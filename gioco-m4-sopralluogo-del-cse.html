@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>M4 · Il sopralluogo del CSE</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e9edf2;font-family:"Segoe UI",Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
+  #game{position:relative;width:800px;height:550px;background:#f7f9fb;border-radius:10px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.15)}
+  header{height:56px;background:#1f3a5f;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+  header h1{font-size:18px;font-weight:600}
+  header .score{font-size:13px;background:rgba(255,255,255,.15);padding:5px 12px;border-radius:14px}
+  #intro{position:absolute;inset:56px 0 0 0;padding:26px 34px}
+  #intro h2{font-size:19px;color:#1f3a5f;margin-bottom:10px}
+  #intro p{font-size:14px;line-height:1.55;color:#1f2d3d;margin-bottom:10px}
+  #intro ul{margin:0 0 12px 20px;font-size:13.5px;line-height:1.6;color:#1f2d3d}
+  #stage{position:absolute;inset:56px 0 0 0;padding:12px 20px;display:none}
+  .steps{display:flex;gap:6px;margin-bottom:8px}
+  .steps span{flex:1;height:6px;border-radius:3px;background:#dbe3ec}
+  .steps span.done{background:#0f8b8d}.steps span.cur{background:#1f3a5f}
+  #event{display:flex;gap:12px;background:#fff;border:1px solid #c9d3de;border-left:6px solid #c0571b;border-radius:8px;padding:10px 14px;min-height:92px}
+  #event .tag{flex:0 0 92px;text-align:center;border-right:1px solid #e1e7ee;padding-right:10px}
+  #event .tag b{display:block;font-size:20px;color:#1f3a5f}
+  #event .tag small{font-size:11px;color:#5b6f84;line-height:1.3;display:block;margin-top:2px}
+  #event .txt{font-size:13.5px;line-height:1.45;color:#1f2d3d;display:flex;align-items:center}
+  .q{font-size:13px;color:#33475b;margin:10px 0 6px;font-weight:600}
+  #options{display:flex;flex-direction:column;gap:6px}
+  .opt{background:#fff;border:2px solid #b8c4d2;border-radius:7px;padding:8px 12px;font-size:13px;line-height:1.35;color:#1f2d3d;cursor:pointer;text-align:left}
+  .opt:hover{border-color:#0f8b8d}
+  .opt:disabled{cursor:default}
+  .opt.best{border-color:#2e7d32;background:#eef7ee}
+  .opt.part{border-color:#b88a12;background:#fdf6e3}
+  .opt.bad{border-color:#c62828;background:#fdecea}
+  #fb{position:absolute;left:20px;right:150px;bottom:12px;background:#fff;border-radius:7px;padding:8px 12px;font-size:12.5px;line-height:1.4;color:#1f2d3d;display:none;max-height:108px;overflow:auto}
+  #fb.best{display:block;border-left:5px solid #2e7d32}#fb.part{display:block;border-left:5px solid #b88a12}#fb.bad{display:block;border-left:5px solid #c62828}
+  #fb .ref{display:block;margin-top:3px;color:#1f3a5f;font-weight:600;font-size:12px}
+  .btn{background:#0f8b8d;color:#fff;border:none;border-radius:6px;padding:9px 20px;font-size:14px;cursor:pointer}
+  #next{position:absolute;right:20px;bottom:14px;display:none}
+  #start{margin-top:6px}
+  #overlay{position:absolute;inset:0;z-index:100;background:#f7f9fb;display:none;flex-direction:column;padding:16px 24px}
+  #overlay h2{font-size:19px;color:#1f3a5f;margin-bottom:8px}
+  .verbale{background:#fff;border:1px solid #c9d3de;border-radius:6px;padding:10px 14px;font-size:12px;line-height:1.42;color:#1f2d3d;height:250px;overflow:auto}
+  .verbale p{margin-bottom:5px}
+  .verbale .h{font-weight:600;color:#1f3a5f}
+  #comments{margin-top:8px;font-size:12px;line-height:1.42;color:#1f2d3d;height:170px;overflow:auto;padding-right:150px}
+  #comments div{padding:2px 0}
+  .g{color:#2e7d32;font-weight:700}.y{color:#b88a12;font-weight:700}.r{color:#c62828;font-weight:700}
+  #overlay .btn{position:absolute;right:24px;bottom:14px}
+  header .right{display:flex;align-items:center;gap:8px}
+  .hb{background:transparent;border:1px solid rgba(255,255,255,.65);color:#fff;border-radius:6px;padding:5px 11px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  .hb:hover{background:rgba(255,255,255,.18)}
+</style>
+</head>
+<body>
+<div id="game">
+  <header><h1>Il sopralluogo del CSE</h1><div class="right"><div class="score">Punteggio: <span id="score">0</span>/8</div><button type="button" class="hb" onclick="init()">Ricomincia</button><button type="button" class="hb" onclick="window.close()">Torna al corso</button></div></header>
+
+  <div id="intro">
+    <h2>Una giornata in cantiere</h2>
+    <p>Sei il coordinatore per l'esecuzione di un cantiere per un edificio residenziale con quattro imprese esecutrici e un'impresa di rilievo. Il PSC prevede una videoanalisi dell'area di carico, gestita dall'impresa affidataria, e un sistema anticollisione per le due gru.</p>
+    <p>Durante il sopralluogo si presentano quattro situazioni. Per ciascuna scegli l'azione che svolgeresti. Al termine il gioco compone il tuo verbale di sopralluogo.</p>
+    <ul>
+      <li>Scelta completa: 2 punti · scelta parziale: 1 punto · scelta errata: 0 punti</li>
+      <li>Ogni scelta mostra la conseguenza e il riferimento normativo</li>
+    </ul>
+    <button class="btn" id="start">Inizia il sopralluogo</button>
+  </div>
+
+  <div id="stage">
+    <div class="steps" id="steps"><span></span><span></span><span></span><span></span></div>
+    <div id="event"><div class="tag"><b id="time"></b><small id="place"></small></div><div class="txt" id="desc"></div></div>
+    <div class="q">Cosa fai?</div>
+    <div id="options"></div>
+    <div id="fb"></div>
+    <button class="btn" id="next">Avanti</button>
+  </div>
+
+  <div id="overlay">
+    <h2 id="outTitle"></h2>
+    <div class="verbale" id="verbale"></div>
+    <div id="comments"></div>
+    <button class="btn" onclick="init()">Ricomincia</button>
+  </div>
+</div>
+<script>
+const EV=[
+ {time:"09:40",place:"Area di carico",desc:"Il cruscotto della videoanalisi registra tre allarmi di prossimità tra persone e mezzi nell'ultima ora. Nessuna impresa ha segnalato nulla.",
+  o:[
+   {t:"Vai sul posto per accertare la situazione reale e la causa degli allarmi",k:"best",f:"Sul posto scopri che un autocarro dell'impresa B scarica fuori dalla zona prevista e gli operai dell'impresa A passano alle sue spalle. Disponi il rispetto dell'area di carico e chiedi al gestore di verificare il posizionamento delle telecamere.",r:"L'allarme è il motivo per andare a vedere: la verifica sul posto fonda le decisioni del CSE.",v:"Ore 09:40, area di carico. Verificati sul posto tre allarmi di prossimità: autocarro dell'impresa B in scarico fuori dalla zona prevista, passaggio di operai dell'impresa A alle sue spalle. Disposto il rispetto dell'area di carico prevista dal PSC; richiesta al gestore la verifica delle telecamere."},
+   {t:"Sospendi tutte le lavorazioni del cantiere finché il sistema non viene controllato",k:"bad",f:"Il cantiere si ferma per un'ora senza sapere quale fosse il problema. La sospensione riguarda le singole lavorazioni esposte a un pericolo grave e imminente riscontrato direttamente.",r:"Art. 92 c. 1 lett. f del D.Lgs. 81/2008.",v:"Ore 09:40, area di carico. Sospese tutte le lavorazioni del cantiere in attesa del controllo del sistema di videoanalisi."},
+   {t:"Chiedi al gestore di ridurre la sensibilità del sistema per evitare allarmi inutili",k:"bad",f:"Gli allarmi spariscono, ma il problema reale resta: autocarro fuori zona e operai alle sue spalle. Abbassare le soglie senza conoscere la causa toglie protezione.",r:"Prima si accerta la causa, poi si interviene sulla taratura.",v:"Ore 09:40, area di carico. Richiesta al gestore la riduzione della sensibilità della videoanalisi."},
+   {t:"Annoti gli allarmi e li porti alla prossima riunione di coordinamento",k:"part",f:"La traccia scritta è utile, ma la verifica rinviata lascia attivo un possibile pericolo per giorni.",r:"Annotare va bene; la verifica sul posto viene prima.",v:"Ore 09:40, area di carico. Annotati tre allarmi di prossimità, da esaminare alla prossima riunione di coordinamento."}
+  ]},
+ {time:"10:30",place:"Fronte di scavo nord",desc:"L'impresa C sta per avviare uno scavo con un escavatore dotato di funzioni autonome di limitazione dei movimenti. La macchina è assente dal POS che hai verificato.",
+  o:[
+   {t:"Contesti per iscritto l'uso della macchina assente dal POS e chiedi l'integrazione prima dell'impiego",k:"best",f:"L'impresa integra il POS con finalità, limiti, zona di esclusione e addestramento dell'operatore. Verifichi la coerenza con il PSC e la macchina entra in servizio il giorno dopo.",r:"Il CSE verifica l'idoneità del POS e contesta per iscritto le inosservanze (art. 92 c. 1 lett. b ed e).",v:"Ore 10:30, fronte di scavo nord. Contestato per iscritto all'impresa C l'impiego di un escavatore con funzioni autonome assente dal POS; richiesta integrazione del POS prima dell'uso."},
+   {t:"Lasci lavorare la macchina, perché ha la marcatura CE e la dichiarazione di conformità del fornitore",k:"bad",f:"La marcatura attesta la conformità del prodotto, non la coerenza con questo cantiere: zona di esclusione, interferenze e addestramento restano sconosciuti.",r:"Conformità del sistema e sicurezza del cantiere sono piani distinti.",v:"Ore 10:30, fronte di scavo nord. Consentito l'uso dell'escavatore con funzioni autonome dell'impresa C in base alla marcatura CE."},
+   {t:"Chiedi a voce al preposto dell'impresa di far rispettare la zona di esclusione durante lo scavo",k:"part",f:"L'indicazione è utile, ma il POS resta incompleto e del tuo intervento non resta traccia.",r:"Le disposizioni del CSE vanno messe per iscritto.",v:"Ore 10:30, fronte di scavo nord. Raccomandata a voce al preposto dell'impresa C attenzione alla zona di esclusione dell'escavatore."},
+   {t:"Sospendi l'intero cantiere fino alla revisione di tutti i POS",k:"bad",f:"Il problema riguarda una sola macchina di una sola impresa: fermare tutto è sproporzionato e ti espone alle contestazioni delle altre imprese.",r:"Contestazione e integrazione del POS sono gli strumenti adeguati.",v:"Ore 10:30. Sospeso l'intero cantiere fino alla revisione di tutti i POS."}
+  ]},
+ {time:"11:15",place:"Solaio del secondo piano",desc:"Un drone dell'impresa di rilievo sorvola a bassa quota l'area in cui sei operai stanno armando il solaio. Il volo non era stato comunicato.",
+  o:[
+   {t:"Fai interrompere subito il volo e contesti per iscritto la mancata comunicazione",k:"best",f:"Il drone atterra. L'impresa di rilievo riprogramma il volo a solaio libero e ti consegna la documentazione dell'operatore. Aggiorni le regole sui voli nel PSC.",r:"Pericolo grave e imminente riscontrato direttamente: sospensione della singola lavorazione (art. 92 c. 1 lett. f).",v:"Ore 11:15, solaio del secondo piano. Sospeso il volo del drone dell'impresa di rilievo sopra operai al lavoro; contestata per iscritto la mancata comunicazione."},
+   {t:"Fai spostare gli operai dall'area sorvolata e lasci proseguire il rilievo con il drone",k:"part",f:"L'esposizione cessa, ma premi l'impresa che non ha comunicato il volo e fermi chi lavorava secondo il programma. L'inosservanza resta senza contestazione.",r:"Il pericolo va eliminato alla fonte e l'inosservanza contestata.",v:"Ore 11:15, solaio del secondo piano. Spostati gli operai dall'area sorvolata dal drone dell'impresa di rilievo."},
+   {t:"Annoti l'episodio nel verbale e lo porti alla prossima riunione di coordinamento",k:"bad",f:"Il pericolo è in atto: una caduta del drone colpirebbe le persone sotto. Il rinvio lascia gli operai esposti.",r:"Davanti a un pericolo grave e imminente il CSE interviene subito.",v:"Ore 11:15, solaio del secondo piano. Annotato il sorvolo del drone, da discutere alla prossima riunione."},
+   {t:"Telefoni all'ENAC per segnalare il volo",k:"bad",f:"Mentre telefoni il drone continua a sorvolare gli operai. Il primo atto spetta a te, sul posto.",r:"Prima si elimina il pericolo, poi si verificano autorizzazioni e requisiti.",v:"Ore 11:15. Segnalato all'ENAC il volo del drone dell'impresa di rilievo."}
+  ]},
+ {time:"12:00",place:"Area gru",desc:"Il sistema anticollisione tra le due gru è fermo da ieri. Le imprese A e D continuano a sollevare carichi con aree di rotazione sovrapposte. Nessuno ha comunicato il fermo.",
+  o:[
+   {t:"Sospendi i sollevamenti nelle aree sovrapposte e contesti per iscritto la mancata comunicazione del fermo",k:"best",f:"I sollevamenti riprendono nel pomeriggio con le procedure sostitutive previste dal PSC (turni di rotazione e segnalatore), in attesa del tecnico. Il fermo non comunicato è agli atti.",r:"Sospensione per pericolo grave e imminente (art. 92 c. 1 lett. f); contestazione e segnalazione (art. 92 c. 1 lett. e).",v:"Ore 12:00, area gru. Sospesi i sollevamenti nelle aree di rotazione sovrapposte delle imprese A e D per fermo del sistema anticollisione; ripresa subordinata al ripristino o alle misure sostitutive del PSC; contestata per iscritto la mancata comunicazione del fermo."},
+   {t:"Chiedi alle due imprese di coordinare i sollevamenti via radio e lasci proseguire il lavoro",k:"part",f:"Il rischio cala, ma la misura è improvvisata, senza le procedure del PSC e senza traccia scritta; il fermo non comunicato resta senza contestazione.",r:"In caso di fermo valgono le misure sostitutive previste dal PSC.",v:"Ore 12:00, area gru. Chiesto alle imprese A e D di coordinare i sollevamenti via radio durante il fermo del sistema anticollisione."},
+   {t:"Chiedi al fornitore di riparare il sistema entro la settimana",k:"bad",f:"Le gru continuano a sollevare con aree sovrapposte e senza protezione fino alla riparazione.",r:"Il pericolo in atto va gestito subito, la riparazione segue.",v:"Ore 12:00, area gru. Richiesta al fornitore la riparazione del sistema anticollisione entro la settimana."},
+   {t:"Segnali il problema al committente e attendi le sue decisioni prima di intervenire",k:"bad",f:"Il committente risponde in serata: per ore le gru lavorano senza protezione. Davanti a un pericolo grave e imminente il potere di sospendere è del CSE.",r:"Art. 92 c. 1 lett. f del D.Lgs. 81/2008.",v:"Ore 12:00, area gru. Segnalato al committente il fermo del sistema anticollisione, in attesa di decisioni."}
+  ]}
+];
+const MISS=[
+ "Area di carico: la verifica sul posto della causa degli allarmi.",
+ "Escavatore dell'impresa C: la contestazione scritta e la richiesta di integrazione del POS prima dell'impiego.",
+ "Drone: la sospensione immediata del volo e la contestazione scritta della mancata comunicazione.",
+ "Gru: la sospensione dei sollevamenti sovrapposti e la contestazione del fermo non comunicato."
+];
+let k,score,choices,order;
+const $=id=>document.getElementById(id);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function init(){k=0;score=0;choices=[];$('score').textContent=0;$('overlay').style.display='none';$('stage').style.display='none';$('intro').style.display='block';}
+$('start').onclick=()=>{$('intro').style.display='none';$('stage').style.display='block';show();};
+function show(){
+  const e=EV[k];
+  [...$('steps').children].forEach((s,i)=>s.className=i<k?'done':i===k?'cur':'');
+  $('time').textContent=e.time;$('place').textContent=e.place;$('desc').textContent=e.desc;
+  $('fb').className='';$('fb').innerHTML='';$('next').style.display='none';
+  const O=$('options');O.innerHTML='';
+  order=shuffle(e.o.map((_,i)=>i));
+  order.forEach(i=>{const b=document.createElement('button');b.className='opt';b.textContent=e.o[i].t;b.onclick=()=>pick(i,b);O.appendChild(b);});
+}
+function pick(i,btn){
+  const e=EV[k],c=e.o[i];
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  btn.classList.add(c.k);
+  if(c.k!=='best'){const bi=e.o.findIndex(o=>o.k==='best');document.querySelectorAll('.opt')[order.indexOf(bi)].classList.add('best');}
+  score+=c.k==='best'?2:c.k==='part'?1:0;$('score').textContent=score;
+  choices.push(c);
+  const lab=c.k==='best'?'Scelta completa.':c.k==='part'?'Scelta parziale.':'Scelta errata.';
+  $('fb').className=c.k;$('fb').innerHTML='<b>'+lab+'</b> '+c.f+'<span class="ref">'+c.r+'</span>';
+  $('next').textContent=k===EV.length-1?'Vedi il verbale':'Avanti';$('next').style.display='block';
+}
+$('next').onclick=()=>{k++;if(k<EV.length)show();else end();};
+function end(){
+  let v='<p class="h">VERBALE DI SOPRALLUOGO DEL COORDINATORE PER L\'ESECUZIONE</p><p>Cantiere: nuovo edificio residenziale, lotto 2. Imprese presenti: A (affidataria), B, C, D e impresa di rilievo.</p>';
+  choices.forEach(c=>{v+='<p>'+c.v+'</p>';});
+  v+='<p>Il presente verbale è trasmesso alle imprese interessate e al committente.</p><p>Il Coordinatore per l\'esecuzione dei lavori</p>';
+  $('verbale').innerHTML=v;
+  let com='';
+  choices.forEach((c,i)=>{const cl=c.k==='best'?'g':c.k==='part'?'y':'r';const s=c.k==='best'?'✔':c.k==='part'?'◐':'✖';com+='<div><span class="'+cl+'">'+s+' '+EV[i].place+':</span> '+c.r+'</div>';});
+  const miss=choices.map((c,i)=>c.k!=='best'?MISS[i]:null).filter(Boolean);
+  if(miss.length)com+='<div><b>Atti che mancano nel tuo verbale:</b> '+miss.join(' ')+'</div>';
+  else com+='<div><b>Il verbale documenta tutti gli atti dovuti: verifica, contestazione, segnalazione e sospensione dove serviva.</b></div>';
+  $('comments').innerHTML=com;
+  $('outTitle').textContent='Il tuo verbale · punteggio '+score+' su 8';
+  $('overlay').style.display='flex';
+}
+init();
+</script>
+</body>
+</html>
